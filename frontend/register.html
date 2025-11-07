@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro - Clases Online</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+    h1 { text-align:center; color:#4a90e2; margin-bottom:20px; }
+    input, select, button {
+      width: 100%;
+      padding: 12px 40px 12px 12px; /* espacio para el ojo */
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #4a90e2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background: #357ABD; }
+    #registerMessage { font-weight: bold; margin-top: 10px; text-align:center; }
+    a { text-decoration: none; color: #4a90e2; font-weight: bold; }
+    a:hover { text-decoration: underline; color: #357ABD; }
+    p { text-align:center; margin-top:15px; }
+
+    .password-container {
+      position: relative;
+    }
+    .toggle-eye {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-55%);
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s;
+    }
+    .toggle-eye.open { transform: translateY(-55%) rotateY(180deg); }
+
+    .strength-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: #eee;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    .strength-bar-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .tooltip {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: -25px;
+      background: #333;
+      color: #fff;
+      padding: 3px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+    .tooltip.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Registro</h1>
+    <form id="registerForm">
+      <input type="text" name="nombre" placeholder="Nombre" required>
+      <input type="email" name="email" placeholder="Email" required>
+
+      <div class="password-container">
+        <input type="password" name="contraseña" id="password" placeholder="Contraseña" required>
+        <svg class="toggle-eye" id="togglePassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path id="eyePath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path id="eyeOutline" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        <div class="tooltip" id="passwordTooltip">Use mayúsculas, minúsculas, números y caracteres especiales</div>
+      </div>
+
+      <div class="strength-bar">
+        <div class="strength-bar-fill" id="strengthBar"></div>
+      </div>
+
+      <select name="rol" required>
+        <option value="">Selecciona rol</option>
+        <option value="estudiante">Estudiante</option>
+        <option value="instructor">Instructor</option>
+      </select>
+      <button type="submit">Registrarse</button>
+    </form>
+    <div id="registerMessage"></div>
+    <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5000/api/auth";
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const strengthBar = document.getElementById('strengthBar');
+    const tooltip = document.getElementById('passwordTooltip');
+
+    // Toggle password con animación
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.type === "password" ? "text" : "password";
+      passwordInput.type = type;
+      togglePassword.classList.toggle('open');
+    });
+
+    // Strength bar y tooltip
+    passwordInput.addEventListener('input', () => {
+      const value = passwordInput.value;
+      let strength = 0;
+      if (value.length >= 8) strength += 1;
+      if (/[A-Z]/.test(value)) strength += 1;
+      if (/[0-9]/.test(value)) strength += 1;
+      if (/[\W_]/.test(value)) strength += 1;
+
+      const percent = (strength / 4) * 100;
+      strengthBar.style.width = percent + '%';
+      strengthBar.style.background = percent < 50 ? 'red' : percent < 75 ? 'orange' : 'green';
+
+      if (!/[A-Z]/.test(value) || !/[a-z]/.test(value) || !/[0-9]/.test(value) || !/[\W_]/.test(value)) {
+        tooltip.classList.add('show');
+      } else {
+        tooltip.classList.remove('show');
+      }
+    });
+
+    // Registro
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      if (!regex.test(data.contraseña)) {
+        document.getElementById('registerMessage').style.color = 'red';
+        document.getElementById('registerMessage').innerText = 'Contraseña insegura, sigue las instrucciones de la barra';
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      const msgDiv = document.getElementById('registerMessage');
+
+      if (res.ok) {
+        msgDiv.style.color = 'green';
+        msgDiv.innerText = result.message;
+        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+        e.target.reset();
+      } else {
+        msgDiv.style.color = 'red';
+        msgDiv.innerText = result.error || 'Error al registrar';
+      }
+    });
+  </script>
+</body>
+</html>
