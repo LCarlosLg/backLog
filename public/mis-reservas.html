@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mis Reservas</title>
+
+    <style>
+        /* ==========================
+           RESET Y BASE
+        ========================== */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f1f3f6;
+            margin: 0;
+            padding: 0;
+            transition: 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* ==========================
+           MODO OSCURO (igual que Clases)
+        ========================== */
+        body.dark {
+            background: #1e1e1e;
+            color: white;
+        }
+        body.dark .container {
+            background: #2a2a2a;
+            color: white;
+        }
+        body.dark table {
+            background: #333;
+        }
+        body.dark th {
+            background: #1a273d !important;
+        }
+        body.dark td {
+            border-bottom: 1px solid #444 !important;
+            color: #e6e6e6;
+        }
+        body.dark tr:hover { background: #3b3b3b !important; }
+
+        /* ==========================
+           SIDEBAR (idéntica a Clases)
+        ========================== */
+        .sidebar {
+            position: fixed;
+            left: -260px; /* ocultada por completo */
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: #2b3f5c;
+            color: white;
+            padding: 20px;
+            transition: 0.4s ease;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        .sidebar.active { left: 0; }
+
+        .menu-title { font-size: 20px; margin-bottom: 20px; font-weight: 600; text-align: center; }
+        .user-info { text-align:center; margin-bottom:25px; }
+        .user-info img { width:90px; height:90px; border-radius:50%; margin-bottom:10px; border:3px solid #fff; }
+        .user-info h3 { font-size:18px; margin:0; color: #fff; }
+
+        .sidebar a {
+            display:block; color:white; padding:12px 10px; border-radius:8px;
+            text-decoration:none; font-size:15px; margin-bottom:10px; cursor:pointer;
+        }
+        .sidebar a:hover { background:#1c2940; }
+
+        .menu-btn {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            background: #2b3f5c;
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 2500;
+        }
+
+        /* SWITCH */
+        .switch-container { margin-top:25px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.3); }
+        .switch-row { display:flex; justify-content:space-between; align-items:center; }
+        .switch { position:relative; width:50px; height:26px; }
+        .switch input { display:none; }
+        .slider {
+            position:absolute; background:#999; border-radius:50px; inset:0; cursor:pointer; transition:0.3s;
+        }
+        .slider::before {
+            content:""; position:absolute; width:20px; height:20px; background:white; left:3px; top:3px; border-radius:50%; transition:0.3s;
+        }
+        input:checked + .slider { background:#4a90e2; }
+        input:checked + .slider::before { transform: translateX(24px); }
+
+        .logout-box { margin-top:30px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.3); }
+        .logout-btn {
+            width:100%; background:#d9534f; border:none; color:white; padding:10px; border-radius:8px; cursor:pointer; margin-top:10px;
+        }
+
+        /* ==========================
+           HEADER + CONTENEDOR (Mis Reservas)
+        ========================== */
+        header {
+            background: #2a4d69;
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            margin-left: 0; /* no shift */
+        }
+
+        /* adjust container so content never under sidebar when sidebar visible: we don't push content, sidebar overlays */
+        .container {
+            max-width: 900px;
+            margin: 80px auto;
+            background: #ffffffcc;
+            padding: 25px 40px;
+            border-radius: 18px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+            backdrop-filter: blur(3px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ==========================
+           TABLA (igual estilo que Clases)
+        ========================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #2b3f5c;
+            color: white;
+            padding: 14px;
+            font-size: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            background: #ffffff;
+            border-bottom: 1px solid #ddd;
+            font-size: 15px;
+            color: #444;
+        }
+
+        tr:hover { background: #f5f7fa; }
+
+        .cancel-btn {
+            background: #d9534f; color:white; padding:7px 12px; border:none; border-radius:8px; cursor:pointer;
+        }
+        .cancel-btn:hover { background:#b2322f; transform: scale(1.03); }
+
+        .total {
+            font-size: 22px; font-weight: bold; text-align: center; margin-top: 25px; color: #2a4d69;
+        }
+
+        button.back {
+            display: block; margin: 30px auto 10px auto; background: #2a4d69; color: white;
+            padding: 12px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 17px;
+        }
+
+        /* MODAL */
+        .modal-bg {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; backdrop-filter: blur(3px); z-index: 3000;
+        }
+        .modal {
+            background: white; width: 350px; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); text-align:center;
+            animation: popup .18s ease-out;
+        }
+        @keyframes popup { from { transform: scale(0.95); opacity:0 } to { transform: scale(1); opacity:1 } }
+
+        /* responsive tweaks so things don't overlap on small screens */
+        @media (max-width: 760px) {
+            .container { margin: 90px 16px; padding: 18px; }
+            .search-box { width: 100%; min-width: unset; }
+            .menu-btn { left: 12px; top: 12px; padding: 10px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- menu button identical -->
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<!-- SIDEBAR (identical to Clases) -->
+<div class="sidebar" id="sidebar">
+    <div class="menu-title">Menú</div>
+
+    <div class="user-info">
+        <img id="avatar" src="" alt="Foto de perfil">
+        <h3 id="nombreUsuario">Usuario</h3>
+    </div>
+
+    <a href="#">📌 Adeudos</a>
+    <a href="#">⚙ Configuración</a>
+    <a href="mis-reservas.html">📚 Mis reservas</a>
+
+    <div class="switch-container">
+        <div class="switch-row">
+            <span>Modo oscuro</span>
+            <label class="switch">
+                <input type="checkbox" id="darkToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="logout-box">
+        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+</div>
+
+<!-- HEADER + CONTENT -->
+<header>Mis Clases Reservadas</header>
+
+<div class="container">
+    <div id="reservas"></div>
+    <p id="total" class="total"></p>
+</div>
+
+<button class="back" onclick="window.location.href='clases.html'">← Regresar a Clases</button>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+    <div class="modal">
+        <h3>¿Cancelar esta clase?</h3>
+        <p>Esta acción no se puede deshacer</p>
+        <br>
+        <button class="btn-cancel" onclick="cerrarModal()">No</button>
+        <button class="btn-confirm" id="confirmarBtn">Sí, cancelar</button>
+    </div>
+</div>
+
+<script>
+    /* ==========================
+       TOKEN y seguridad
+    ========================== */
+    const token = localStorage.getItem("token");
+    let reservaAEliminar = null;
+
+    if (!token) {
+        alert("No has iniciado sesión.");
+        window.location.href = "login.html";
+    }
+
+    /* ==========================
+       SIDEBAR - abrir/cerrar EXACTAMENTE igual
+    ========================== */
+    function toggleMenu() {
+        document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    /* ==========================
+       PERFIL (igual dicebear)
+    ========================== */
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const nombre =
+            payload.nombre ||
+            payload.usuario ||
+            payload.name ||
+            payload.fullname ||
+            payload.email?.split("@")[0] ||
+            "Usuario";
+
+        document.getElementById("nombreUsuario").textContent = nombre;
+        document.getElementById("avatar").src =
+            `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(nombre)}`;
+    } catch (e) {
+        // token decode falló (no bloqueamos la página aquí porque ya validamos antes)
+        console.warn("No se pudo leer el payload del token:", e);
+    }
+
+    /* ==========================
+       MODO OSCURO (igual)
+    ========================== */
+    const toggleDark = document.getElementById("darkToggle");
+    toggleDark.addEventListener("change", () => {
+        document.body.classList.toggle("dark", toggleDark.checked);
+    });
+
+    /* ==========================
+       LOGOUT
+    ========================== */
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+    }
+
+    /* ==========================
+       MODAL (Mis Reservas)
+    ========================== */
+    function abrirModal(idReserva) {
+        reservaAEliminar = idReserva;
+        document.getElementById("modal-bg").style.display = "flex";
+    }
+    function cerrarModal() {
+        document.getElementById("modal-bg").style.display = "none";
+        reservaAEliminar = null;
+    }
+
+    document.getElementById("confirmarBtn").onclick = function () {
+        if (!reservaAEliminar) return;
+
+        fetch(`/api/clases/cancelar/${reservaAEliminar}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(() => location.reload())
+        .catch(err => console.error(err));
+    };
+
+    /* ==========================
+       CARGAR RESERVAS (tabla con estilo igual)
+    ========================== */
+    fetch("/api/clases/mis-reservas", {
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(reservas => {
+        const cont = document.getElementById("reservas");
+
+        if (!Array.isArray(reservas) || reservas.length === 0) {
+            cont.innerHTML = `<p>No tienes reservas todavía.</p>`;
+            return;
+        }
+
+        let tabla = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Horario</th>
+                        <th>Instructor</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        let total = 0;
+
+        reservas.forEach(r => {
+            total += Number(r.precio) || 0;
+
+            tabla += `
+                <tr>
+                    <td>${escapeHtml(r.titulo)}</td>
+                    <td>${escapeHtml(r.horario)}</td>
+                    <td>${escapeHtml(r.instructor)}</td>
+                    <td>${escapeHtml(r.descripcion || "")}</td>
+                    <td>$${Number(r.precio).toFixed(2)}</td>
+                    <td><button class="cancel-btn" onclick="abrirModal(${Number(r.id_reserva)})">Cancelar</button></td>
+                </tr>
+            `;
+        });
+
+        tabla += `</tbody></table>`;
+        cont.innerHTML = tabla;
+
+        document.getElementById("total").innerHTML =
+            `Total a pagar: <strong>$${total.toFixed(2)}</strong>`;
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error al cargar tus reservas.");
+    });
+
+    /* ==========================
+       UTIL: escapar HTML para evitar inyección en el template
+    ========================== */
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return "";
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+
+</body>
+</html>

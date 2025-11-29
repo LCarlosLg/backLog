@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Clases Online</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #357ABD;
+        }
+
+        #loginMessage {
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        a {
+            text-decoration: none;
+            color: #4a90e2;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #357ABD;
+        }
+
+        p {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-eye {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-55%);
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-eye.open {
+            transform: translateY(-55%) rotateY(180deg);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            color: #4a90e2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Login</h1>
+
+        <form id="loginForm">
+            <input type="email" name="email" placeholder="Email" required>
+
+            <div class="password-container">
+                <input type="password" name="contraseña" id="password" placeholder="Contraseña" required>
+
+                <svg class="toggle-eye" id="togglePassword" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path id="eyePath" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path id="eyeOutline" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </div>
+
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+
+        <div id="loginMessage"></div>
+
+        <p>
+            ¿No tienes cuenta?
+            <a href="register.html">Crear una cuenta</a>
+        </p>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content" id="modalContent">
+            Usuario accedió correctamente
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api/auth";
+
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const modal = document.getElementById('successModal');
+
+        // Mostrar/ocultar contraseña
+        togglePassword.addEventListener('click', () => {
+            passwordInput.type =
+                passwordInput.type === "password" ? "text" : "password";
+
+            togglePassword.classList.toggle('open');
+        });
+
+        // LOGIN
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            let res;
+            try {
+                res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+            } catch (error) {
+                document.getElementById('loginMessage').innerText =
+                    "Error conectando con el servidor";
+                return;
+            }
+
+            const result = await res.json();
+            const msgDiv = document.getElementById('loginMessage');
+
+            if (res.ok) {
+
+                // Mostrar modal
+                modal.style.display = 'flex';
+                setTimeout(() => { modal.style.display = 'none'; }, 1800);
+
+                // Guardar token y rol
+                localStorage.setItem('token', result.token);
+                localStorage.setItem('rol', result.rol);
+
+                // Redirección por rol
+                setTimeout(() => {
+                    if (result.rol === "estudiante") {
+                        window.location.href = "clases.html";
+                    } else if (result.rol === "instructor") {
+                        window.location.href = "instructor.html";
+                    } else {
+                        msgDiv.style.color = 'orange';
+                        msgDiv.innerText = "Rol no permitido";
+                    }
+                }, 900);
+
+            } else {
+                msgDiv.style.color = 'red';
+                msgDiv.innerText =
+                    result.error || "Credenciales incorrectas";
+            }
+        });
+    </script>
+
+</body>
+
+</html>

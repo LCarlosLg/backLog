@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Clases Disponibles</title>
+
+    <style>
+        /* ==========================
+           RESET Y BASE
+        ========================== */
+        * { box-sizing: border-box; }
+        body { 
+            font-family: "Segoe UI", Arial, sans-serif; 
+            background: #f1f3f6; 
+            margin: 0; padding: 0; 
+            transition: 0.3s; 
+            overflow-x: hidden; 
+        }
+        body.dark { 
+            background: #1e1e1e; 
+            color: white; 
+        }
+        body.dark .container { background: #2a2a2a; color: white; }
+        body.dark table { background: #333; }
+        body.dark th { background: #1a273d !important; }
+        body.dark td { border-bottom: 1px solid #444 !important; color: white; }
+        body.dark tr:hover { background: #3b3b3b !important; }
+        body.dark .btn-reservar { background: #1f3a60; }
+
+        /* ==========================
+           SIDEBAR
+        ========================== */
+        .sidebar { 
+            position: fixed; left: -260px; top: 0; 
+            width: 260px; height: 100%; 
+            background: #2b3f5c; color: white; 
+            padding: 20px; transition: 0.4s ease; 
+            box-shadow: 3px 0 10px rgba(0,0,0,0.2); 
+            z-index: 2000; 
+        }
+        .sidebar.active { left: 0; }
+        .menu-title { 
+            font-size: 20px; 
+            margin-bottom: 20px; 
+            font-weight: 600; 
+            text-align: center; 
+        }
+        .user-info { text-align: center; margin-bottom: 25px; }
+        .user-info img { 
+            width: 90px; height: 90px; border-radius: 50%; 
+            margin-bottom: 10px; border: 3px solid #fff; 
+        }
+        .sidebar a { 
+            display: block; color: white; padding: 12px 10px; 
+            border-radius: 8px; text-decoration: none; 
+            font-size: 15px; margin-bottom: 10px; cursor: pointer; 
+        }
+        .sidebar a:hover { background: #1c2940; }
+        .menu-btn { 
+            position: fixed; left: 20px; top: 20px; 
+            background: #2b3f5c; border: none; color: white; 
+            padding: 12px 15px; font-size: 18px; border-radius: 8px; 
+            cursor: pointer; z-index: 3000; 
+        }
+
+        /* ==========================
+           SWITCH (MODO OSCURO)
+        ========================== */
+        .switch-container { 
+            margin-top: 25px; padding-top: 15px; 
+            border-top: 1px solid rgba(255,255,255,0.3); 
+        }
+        .switch-row { display: flex; justify-content: space-between; align-items: center; }
+        .switch { position: relative; width: 50px; height: 26px; }
+        .switch input { display: none; }
+        .slider { 
+            position: absolute; background: #999; border-radius: 50px; 
+            inset: 0; cursor: pointer; transition: 0.3s; 
+        }
+        .slider::before { 
+            content: ""; position: absolute; width: 20px; height: 20px; 
+            background: white; left: 3px; top: 3px; border-radius: 50%; 
+            transition: 0.3s; 
+        }
+        input:checked + .slider { background: #4a90e2; }
+        input:checked + .slider::before { transform: translateX(24px); }
+
+        /* ==========================
+           CERRAR SESIÓN
+        ========================== */
+        .logout-box { 
+            margin-top: 30px; padding-top: 15px; 
+            border-top: 1px solid rgba(255,255,255,0.3); 
+        }
+        .logout-btn { 
+            width: 100%; background: #d9534f; border: none; 
+            color: white; padding: 10px; border-radius: 8px; 
+            cursor: pointer; margin-top: 10px; 
+        }
+
+        /* ==========================
+           CONTENEDOR PRINCIPAL
+        ========================== */
+        .container { 
+            max-width: 1100px; margin: 80px auto; 
+            background: white; padding: 30px; 
+            border-radius: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
+            position: relative; 
+        }
+        h1 { 
+            text-align: center; color: #2b3f5c; margin-bottom: 25px; 
+            font-size: 32px; font-weight: 700; 
+        }
+
+        /* ==========================
+           BUSCADOR
+        ========================== */
+        .search-container { 
+            display: flex; justify-content: center; flex-wrap: wrap; 
+            gap: 15px; margin-bottom: 25px; 
+        }
+        .search-box { position: relative; width: 65%; min-width: 260px; }
+        .search-box input { 
+            width: 100%; padding: 12px 40px 12px 15px; 
+            font-size: 16px; border-radius: 10px; border: 1px solid #ccc; 
+        }
+        .search-box i { 
+            position: absolute; right: 12px; top: 12px; 
+            font-size: 18px; color: #666; 
+        }
+
+        /* ==========================
+           FILTROS
+        ========================== */
+        .filter-btn { 
+            padding: 12px 20px; background: #2b3f5c; 
+            color: white; border: none; border-radius: 10px; 
+            cursor: pointer; height: 48px; 
+        }
+        .filter-panel { 
+            display: none; margin-top: 10px; background: #eef1f6; 
+            padding: 15px; border-radius: 12px; 
+        }
+        .filter-panel input { 
+            width: 100%; padding: 10px; margin-bottom: 12px; 
+            border-radius: 8px; border: 1px solid #ccc; 
+        }
+
+        /* ==========================
+           TABLA
+        ========================== */
+        table { 
+            width: 100%; border-collapse: collapse; overflow: hidden; 
+            border-radius: 12px; 
+        }
+        th { 
+            background: #2b3f5c; color: white; padding: 14px; 
+            font-size: 17px; text-align: left; 
+        }
+        td { 
+            padding: 12px; border-bottom: 1px solid #e2e2e2; color: #444; 
+        }
+        tr:hover { background: #f5f7fa; transition: 0.2s; }
+        .btn-reservar { 
+            background: #2b3f5c; padding: 8px 14px; color: white; 
+            border: none; border-radius: 6px; cursor: pointer; font-size: 14px; 
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+    <!-- =====================
+         SIDEBAR
+    ====================== -->
+    <div class="sidebar" id="sidebar">
+
+        <div class="menu-title">Menú</div>
+
+        <div class="user-info">
+            <img id="avatar" src="" alt="Foto de perfil">
+            <h3 id="nombreUsuario">Usuario</h3>
+        </div>
+
+        <!-- Botón para subir foto -->
+        <button 
+            onclick="document.getElementById('inputFoto').click()"
+            style="margin-top:10px; padding:8px; width:100%; border:none; border-radius:8px; background:#4a90e2; color:white; cursor:pointer;">
+            Cambiar foto
+        </button>
+        <input type="file" id="inputFoto" accept="image/*" style="display:none">
+
+        <a href="#">📌 Adeudos</a>
+        <a href="#">⚙ Configuración</a>
+        <a href="mis-reservas.html">📚 Mis reservas</a>
+
+        <div class="switch-container">
+            <div class="switch-row">
+                <span>Modo oscuro</span>
+                <label class="switch">
+                    <input type="checkbox" id="darkToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="logout-box">
+            <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <!-- =====================
+         CONTENIDO PRINCIPAL
+    ====================== -->
+    <div class="container">
+
+        <h1>Clases Disponibles</h1>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input id="buscador" type="text" placeholder="Buscar clase por título, instructor, precio, etc...">
+                <i>🔍</i>
+            </div>
+
+            <button class="filter-btn" onclick="toggleFilters()">Filtros</button>
+        </div>
+
+        <div id="panelFiltros" class="filter-panel">
+            <input type="number" id="filtroCosto" placeholder="Costo máximo">
+            <input type="text" id="filtroHorario" placeholder="Horario (ej: 10:00)">
+            <input type="number" id="filtroCupo" placeholder="Cupo mínimo">
+            <button class="filter-btn" onclick="aplicarFiltros()">Aplicar filtros</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Horario</th>
+                    <th>Cupo</th>
+                    <th>Precio</th>
+                    <th>Instructor</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="listaClases"></tbody>
+        </table>
+
+        <p id="sinClases" style="display:none;">No hay clases registradas por el momento.</p>
+
+    </div>
+
+    <script>
+        // ==========================
+        // TOKEN
+        // ==========================
+        const token = localStorage.getItem("token");
+        let clasesGlobal = [];
+
+        if (!token) {
+            alert("No hay token. Inicia sesión primero.");
+            window.location.href = "login.html";
+        }
+
+        // ==========================
+        // MENU
+        // ==========================
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("active");
+        }
+
+        // ==========================
+        // PERFIL (OBTENER DESDE BACKEND)
+        // ==========================
+        fetch("/api/usuario/me", {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(user => {
+            const nombre = user.nombre || "Usuario";
+            document.getElementById("nombreUsuario").textContent = nombre;
+
+            if(user.foto_perfil){
+                document.getElementById("avatar").src = `/uploads/${user.foto_perfil}?t=${Date.now()}`;
+            } else {
+                document.getElementById("avatar").src = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(nombre)}`;
+            }
+        })
+        .catch(err => console.log("No se pudo cargar el usuario correctamente"));
+
+        // ==========================
+        // SUBIR FOTO DE PERFIL
+        // ==========================
+        document.getElementById("inputFoto").addEventListener("change", async function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("foto", file);
+
+            try {
+                const res = await fetch("/api/usuario/foto", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.foto) {
+                    const avatar = document.getElementById("avatar");
+                    avatar.src = `/uploads/${data.foto}?t=${Date.now()}`;
+                    alert("Foto actualizada correctamente");
+                } else {
+                    alert("No se pudo actualizar la foto");
+                }
+            } catch (err) {
+                alert("Error al subir la foto");
+                console.error(err);
+            }
+        });
+
+        // ==========================
+        // DARK MODE
+        // ==========================
+        const toggle = document.getElementById("darkToggle");
+        toggle.addEventListener("change", () => {
+            document.body.classList.toggle("dark", toggle.checked);
+        });
+
+        // ==========================
+        // LOGOUT
+        // ==========================
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        }
+
+        // ==========================
+        // CARGA DE CLASES
+        // ==========================
+        fetch("/api/clases", { headers: { "Authorization": `Bearer ${token}` } })
+        .then(res => res.json())
+        .then(clases => { clasesGlobal = clases; mostrarClases(clases); });
+
+        function mostrarClases(lista) {
+            const tabla = document.getElementById("listaClases");
+            const mensaje = document.getElementById("sinClases");
+            tabla.innerHTML = "";
+
+            if(lista.length === 0){
+                mensaje.style.display = "block";
+                return;
+            }
+            mensaje.style.display = "none";
+
+            lista.forEach(clase => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+                    <td>${clase.titulo}</td>
+                    <td>${clase.descripcion}</td>
+                    <td>${clase.horario}</td>
+                    <td>${clase.cupo}</td>
+                    <td>${clase.precio}</td>
+                    <td>${clase.instructor}</td>
+                    <td><button class="btn-reservar">Reservar</button></td>
+                `;
+                tabla.appendChild(fila);
+            });
+        }
+
+        // ==========================
+        // FILTROS Y BUSCADOR
+        // ==========================
+        function toggleFilters() {
+            document.getElementById("panelFiltros").style.display =
+                document.getElementById("panelFiltros").style.display === "block" ? "none" : "block";
+        }
+
+        function aplicarFiltros() {
+            const costo = document.getElementById("filtroCosto").value;
+            const horario = document.getElementById("filtroHorario").value;
+            const cupo = document.getElementById("filtroCupo").value;
+
+            let filtradas = clasesGlobal.filter(c => {
+                return (!costo || c.precio <= costo) &&
+                       (!horario || c.horario.includes(horario)) &&
+                       (!cupo || c.cupo >= cupo);
+            });
+
+            mostrarClases(filtradas);
+        }
+
+        document.getElementById("buscador").addEventListener("input", function() {
+            const texto = this.value.toLowerCase();
+            const filtradas = clasesGlobal.filter(c =>
+                c.titulo.toLowerCase().includes(texto) ||
+                c.descripcion.toLowerCase().includes(texto) ||
+                c.instructor.toLowerCase().includes(texto) ||
+                c.precio.toString().includes(texto)
+            );
+            mostrarClases(filtradas);
+        });
+    </script>
+
+</body>
+</html>
