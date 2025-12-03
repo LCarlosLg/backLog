@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 /* ------------------------------
-✅ Conexión a MySQL
+Conexión a MySQL
 ------------------------------ */
 const db = mysql.createPool({
     host: process.env.DB_HOST,
@@ -29,17 +29,17 @@ const db = mysql.createPool({
 
 db.getConnection((err, connection) => {
     if (err) {
-        console.error("❌ Error al conectar a MySQL:", err);
+        console.error(" Error al conectar a MySQL:", err);
         return;
     }
-    console.log("✅ Conectado a la base de datos MySQL");
+    console.log("Conectado a la base de datos MySQL");
     connection.release();
 });
 
 global.db = db;
 
 /* ------------------------------
-✅ Servir archivos estáticos
+Servir archivos estáticos
 ------------------------------ */
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -49,12 +49,12 @@ app.get('/', (req, res) => {
 });
 
 /* ------------------------------
-✅ Middleware de autenticación
+Middleware de autenticación
 ------------------------------ */
 const { authenticateToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 /* ------------------------------
-✅ Registro
+Registro
 ------------------------------ */
 app.post('/api/auth/register', async (req, res) => {
     const { nombre, email, contraseña, rol } = req.body;
@@ -85,7 +85,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 /* ------------------------------
-✅ Login
+Login
 ------------------------------ */
 app.post('/api/auth/login', async (req, res) => {
     const { email, contraseña } = req.body;
@@ -120,7 +120,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 /* ------------------------------
-✅ Obtener perfil (NUEVA RUTA CORRECTA)
+Obtener perfil
 ------------------------------ */
 app.get('/api/usuarios/perfil', authenticateToken, async (req, res) => {
     try {
@@ -139,7 +139,7 @@ app.get('/api/usuarios/perfil', authenticateToken, async (req, res) => {
 });
 
 /* ------------------------------
-✅ Multer configuración
+Multer configuración
 ------------------------------ */
 const storage = multer.diskStorage({
     destination: './uploads',
@@ -151,7 +151,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ------------------------------
-✅ Subir foto (NUEVA RUTA CORRECTA)
+Subir foto 
 ------------------------------ */
 app.post('/api/usuarios/foto', authenticateToken, upload.single('foto'), async (req, res) => {
     const id_usuario = req.user.id_usuario;
@@ -174,22 +174,22 @@ app.post('/api/usuarios/foto', authenticateToken, upload.single('foto'), async (
 });
 
 /* ------------------------------
-✅ Rutas de clases
+Rutas de clases
 ------------------------------ */
 const classesRoutes = require('./routes/classes');
 app.use('/api/clases', classesRoutes);
 
 /* ------------------------------
-✅ Rutas de instructor
------------------------------- */
+Rutas de instructor
+----------------------------- */
 const instructorRoutes = require('./routes/instructor');
 app.use('/api/instructor', instructorRoutes);
 
 /* ------------------------------
-✅ Iniciar servidor
+Iniciar servidor
 ------------------------------ */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+    console.log(` El servidor se esta ejecutando en:  http://localhost:${PORT}`);
 });

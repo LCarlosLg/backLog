@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Mis Reservas</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJzL2s/bHblC+eP+G35a3K217fX+h+G+K/sL2x+Z/bHblC+eP+G35a3K217fX+h+G+K/sL2x+Z/P2/02+S/J3/29/A+W4/A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
         /* ==========================
         RESET Y BASE
@@ -21,46 +23,80 @@
         }
 
         /* ==========================
-        MODO OSCURO (igual que Clases)
+        MODO OSCURO
         ========================== */
         body.dark {
             background: #1e1e1e;
             color: white;
         }
-        body.dark .container {
+        body.dark .container, 
+        body.dark .calendar-container {
             background: #2a2a2a;
             color: white;
         }
-        body.dark table {
-            background: #333;
-        }
+        
+        /* --- Dark Mode para Tabla y Contenedores --- */
+        body.dark table { background: #2b2b2b; }
+        body.dark thead tr { background: #1a273d !important; }
         body.dark th {
-            background: #1a273d !important;
+            background: #1a273d !important; color: #e6e6e6 !important;
+            border-bottom: 1px solid #333 !important;
         }
+        body.dark tbody tr { background: transparent; color: #e6e6e6; }
+        body.dark tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
         body.dark td {
-            border-bottom: 1px solid #444 !important;
+            background: transparent !important; border-bottom: 1px solid #3a3a3a !important;
             color: #e6e6e6;
         }
         body.dark tr:hover { background: #3b3b3b !important; }
+        body.dark .total { color: #8ab4f8; }
+
+        /* MODAL DE CANCELACIÓN (Dark Mode) */
+        body.dark .modal { 
+            background: #2a2a2a; /* Fondo oscuro */
+            color: #e6e6e6;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
+        }
+        body.dark .modal h3 { color: white; }
+        body.dark .detalle-clase-cancelar { 
+            background: #1e1e1e; 
+            border: 1px solid #444; 
+        }
+        body.dark .detalle-clase-cancelar strong { color: #8ab4f8; }
+
+        body.dark .btn-confirm { 
+            background: #d9534f; 
+            color: white; 
+        }
+        body.dark .btn-cancel { 
+            background: #555; 
+            color: white; 
+        }
+        
+        /* CUADRO DE ÉXITO (Dark Mode) - Mantiene estilo anterior */
+        body.dark .success-dialog { background: #2a2a2a; color: white; }
+        body.dark .success-dialog h3 { color: #28a745; }
+
+
+        /* Estilos del Dark Mode para el Calendario */
+        body.dark .calendar-container { border: 1px solid #444; }
+        body.dark .calendar-header { background: #2b3f5c; color: white; }
+        body.dark .calendar-weekday { color: #8ab4f8; }
+        body.dark .calendar-day.current-month { background: #2b2b2b; }
+        body.dark .calendar-dot { background-color: #f1c40f; } 
+        body.dark .reservation-info { background-color: #1a1a1a; border: 1px solid #444; }
+        body.dark .reservation-info strong { color: #ffcc00; }
+
 
         /* ==========================
-        SIDEBAR (idéntica a Clases)
+        SIDEBAR
         ========================== */
         .sidebar {
-            position: fixed;
-            left: -260px; /* ocultada por completo */
-            top: 0;
-            width: 260px;
-            height: 100%;
-            background: #2b3f5c;
-            color: white;
-            padding: 20px;
-            transition: 0.4s ease;
-            box-shadow: 3px 0 10px rgba(0,0,0,0.2);
-            z-index: 2000;
-            overflow-y: auto;
+            position: fixed; left: -260px; top: 0; width: 260px; height: 100%;
+            background: #2b3f5c; color: white; padding: 20px; transition: 0.4s ease;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.2); z-index: 2000; overflow-y: auto;
         }
-        .sidebar.active { left: 0; }
+        .sidebar.active { left: 0; } 
 
         .menu-title { font-size: 20px; margin-bottom: 20px; font-weight: 600; text-align: center; }
         .user-info { text-align:center; margin-bottom:25px; }
@@ -74,92 +110,41 @@
         .sidebar a:hover { background:#1c2940; }
 
         .menu-btn {
-            position: fixed;
-            left: 20px;
-            top: 20px;
-            background: #2b3f5c;
-            border: none;
-            color: white;
-            padding: 12px 15px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            z-index: 2500;
+            position: fixed; left: 20px; top: 20px; background: #2b3f5c; border: none;
+            color: white; padding: 12px 15px; font-size: 18px; border-radius: 8px;
+            cursor: pointer; z-index: 2500;
         }
-
-        /* SWITCH */
         .switch-container { margin-top:25px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.3); }
         .switch-row { display:flex; justify-content:space-between; align-items:center; }
         .switch { position:relative; width:50px; height:26px; }
         .switch input { display:none; }
-        .slider {
-            position:absolute; background:#999; border-radius:50px; inset:0; cursor:pointer; transition:0.3s;
-        }
-        .slider::before {
-            content:""; position:absolute; width:20px; height:20px; background:white; left:3px; top:3px; border-radius:50%; transition:0.3s;
-        }
+        .slider { position:absolute; background:#999; border-radius:50px; inset:0; cursor:pointer; transition:0.3s; }
+        .slider::before { content:""; position:absolute; width:20px; height:20px; background:white; left:3px; top:3px; border-radius:50%; transition:0.3s; }
         input:checked + .slider { background:#4a90e2; }
         input:checked + .slider::before { transform: translateX(24px); }
-
         .logout-box { margin-top:30px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.3); }
-        .logout-btn {
-            width:100%; background:#d9534f; border:none; color:white; padding:10px; border-radius:8px; cursor:pointer; margin-top:10px;
-        }
+        .logout-btn { width:100%; background:#d9534f; border:none; color:white; padding:10px; border-radius:8px; cursor:pointer; margin-top:10px; }
+
 
         /* ==========================
-        HEADER + CONTENEDOR (Mis Reservas)
+        HEADER + CONTENEDOR
         ========================== */
         header {
-            background: #2a4d69;
-            color: white;
-            padding: 25px 0;
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-            margin-left: 0; /* no shift */
+            background: #2a4d69; color: white; padding: 25px 0; text-align: center;
+            font-size: 28px; font-weight: bold; box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            margin-left: 0;
         }
-
-        /* adjust container so content never under sidebar when sidebar visible: we don't push content, sidebar overlays */
+        .main-content {
+            max-width: 900px; margin: 80px auto 40px auto; padding: 0 20px; display: block; 
+        }
         .container {
-            max-width: 900px;
-            margin: 80px auto;
-            background: #ffffffcc;
-            padding: 25px 40px;
-            border-radius: 18px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.1);
-            backdrop-filter: blur(3px);
-            position: relative;
-            z-index: 1;
+            width: 100%; background: #ffffffcc; padding: 25px 40px;
+            border-radius: 18px; box-shadow: 0 4px 18px rgba(0,0,0,0.1); backdrop-filter: blur(3px);
+            position: relative; z-index: 1; margin-bottom: 30px; 
         }
-
-        /* ==========================
-        TABLA (igual estilo que Clases)
-        ========================== */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        th {
-            background: #2b3f5c;
-            color: white;
-            padding: 14px;
-            font-size: 15px;
-            text-align: left;
-        }
-
-        td {
-            padding: 12px;
-            background: #ffffff;
-            border-bottom: 1px solid #ddd;
-            font-size: 15px;
-            color: #444;
-        }
-
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 10px; overflow: hidden; }
+        th { background: #2b3f5c; color: white; padding: 14px; font-size: 15px; text-align: left; }
+        td { padding: 12px; background: #ffffff; border-bottom: 1px solid #ddd; font-size: 15px; color: #444; }
         tr:hover { background: #f5f7fa; }
 
         .cancel-btn {
@@ -167,40 +152,182 @@
         }
         .cancel-btn:hover { background:#b2322f; transform: scale(1.03); }
 
-        .total {
-            font-size: 22px; font-weight: bold; text-align: center; margin-top: 25px; color: #2a4d69;
-        }
+        .total { font-size: 22px; font-weight: bold; text-align: center; margin-top: 25px; color: #2a4d69; }
 
         button.back {
             display: block; margin: 30px auto 10px auto; background: #2a4d69; color: white;
             padding: 12px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 17px;
         }
 
-        /* MODAL */
+        /* ==========================
+        CALENDARIO
+        ========================== */
+        .calendar-container {
+            background: white; padding: 20px; border-radius: 18px; box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+        }
+        .calendar-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; background: #2a4d69; color: white; border-radius: 10px 10px 0 0;
+            margin-bottom: 10px; font-weight: bold;
+        }
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center;
+        }
+        .calendar-weekday {
+            font-weight: bold; padding: 8px 0; color: #2a4d69;
+        }
+        .calendar-day {
+            padding: 10px 5px; border-radius: 5px; background: #f1f3f6; color: #555;
+            font-size: 14px; cursor: default; position: relative; height: 50px; 
+            display: flex; flex-direction: column; justify-content: space-between;
+            align-items: center; padding-bottom: 5px; 
+        }
+        .calendar-day-number { font-weight: bold; }
+        .calendar-dot {
+            width: 6px; height: 6px; background-color: #ffcc00; border-radius: 50%; margin-top: 3px;
+        }
+        .calendar-day.current-month { background: #e9ecef; }
+        .calendar-day:hover .reservation-info {
+            opacity: 1; visibility: visible; transform: translate(-50%, -10px); 
+        }
+        .reservation-info {
+            position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, 0); 
+            background-color: #333; color: white; padding: 8px; border-radius: 5px;
+            font-size: 12px; white-space: nowrap; opacity: 0; visibility: hidden;
+            transition: opacity 0.2s, transform 0.2s; z-index: 100; pointer-events: none; 
+            text-align: left; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .reservation-info strong { display: block; margin-bottom: 3px; color: #ffcc00; }
+        .reservation-info p { margin: 0; font-size: 11px; }
+
+
+        /* ==========================
+        MODAL CANCELACIÓN (SOLO MODIFICACIONES SOLICITADAS) 
+        ========================== */
         .modal-bg {
             position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; backdrop-filter: blur(3px); z-index: 3000;
+            background: rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px);
+            z-index: 3000;
         }
         .modal {
-            background: white; width: 350px; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); text-align:center;
-            animation: popup .18s ease-out;
+            background: white; /* Fondo blanco, como el de reserva */
+            width: 380px; max-width: 90%; padding: 30px;
+            border-radius: 18px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align:center; 
+            color: #333; /* Texto oscuro */
+            animation: zoomIn 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
         }
-        @keyframes popup { from { transform: scale(0.95); opacity:0 } to { transform: scale(1); opacity:1 } }
+        .modal h3 {
+            font-size: 24px;
+            color: #2a4d69; /* Color de encabezado oscuro */
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .modal p {
+            margin-bottom: 15px;
+        }
+        /* Detalle de la clase, con fondo y estructura limpia */
+        .detalle-clase-cancelar {
+            background: #f8f8f8; 
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            margin: 20px 0;
+            border: 1px solid #eee;
+        }
+        .detalle-clase-cancelar strong {
+            display: inline-block;
+            width: 80px; 
+            font-weight: 600;
+            color: #444;
+        }
+        .detalle-clase-cancelar p {
+            margin: 5px 0;
+            font-size: 15px;
+        }
 
-        /* responsive tweaks so things don't overlap on small screens */
+        /* Botones del Modal */
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end; /* Alineación a la derecha */
+            margin-top: 25px;
+        }
+        
+        /* Botones de acción */
+        .btn-cancel, .btn-confirm {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
+            margin-left: 10px; /* Separación entre botones */
+            flex-grow: 0;
+        }
+
+        .btn-cancel {
+            /* Mantener Reserva (Estilo secundario/Cancelar de la referencia) */
+            background: #e0e0e0;
+            color: #333;
+        }
+        .btn-cancel:hover { background: #d0d0d0; }
+
+        .btn-confirm {
+            /* Sí, Cancelar Clase (Estilo primario/Reservar Ahora de la referencia, pero rojo para Cancelar) */
+            background: #d9534f; /* Rojo de cancelación */
+            color: white;
+        }
+        .btn-confirm:hover { background: #c9302c; transform: scale(1.02); }
+
+
+        /* CUADRO DE DIÁLOGO DE ÉXITO (Mantiene estilo anterior y animación) */
+        .success-dialog {
+            width: 320px; padding: 30px; border-radius: 18px; text-align: center;
+            background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 5000; display: none;
+        }
+        .success-dialog i { font-size: 50px; color: #28a745; margin-bottom: 15px; }
+
+        /* Animaciones */
+        @keyframes zoomIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .success-dialog.show {
+            display: block !important;
+            animation: bounceIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .success-dialog.show i {
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes bounceIn {
+            0% { transform: translate(-50%, -100%) scale(0.1); opacity: 0; }
+            60% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* MEDIA QUERY - Ajustes de Botón */
         @media (max-width: 760px) {
-            .container { margin: 90px 16px; padding: 18px; }
-            .search-box { width: 100%; min-width: unset; }
+            .main-content { margin: 90px 16px 40px 16px; padding: 0; }
+            .container { padding: 18px; }
             .menu-btn { left: 12px; top: 12px; padding: 10px 12px; }
+            /* Botones del modal en dispositivos pequeños */
+            .modal-footer { flex-direction: column; justify-content: center; }
+            .btn-cancel, .btn-confirm { margin: 5px 0; }
         }
     </style>
 </head>
 <body>
 
-<!-- menu button identical -->
 <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-<!-- SIDEBAR (identical to Clases) -->
 <div class="sidebar" id="sidebar">
     <div class="menu-title">Menú</div>
 
@@ -228,122 +355,343 @@
     </div>
 </div>
 
-<!-- HEADER + CONTENT -->
 <header>Mis Clases Reservadas</header>
 
-<div class="container">
-    <div id="reservas"></div>
-    <p id="total" class="total"></p>
+<div class="main-content">
+    
+    <div class="reservas-section">
+        <div class="container">
+            <h2 style="margin-top:0; color:#2a4d69;">Detalle de Reservas</h2>
+            <div id="reservas"></div>
+            <p id="total" class="total"></p>
+        </div>
+        <button class="back" onclick="window.location.href='clases.html'">← Regresar a Clases</button>
+    </div>
+
+    <div class="calendar-section">
+        <div class="container calendar-container">
+            <h2 style="margin-top:0; color:#2a4d69;">Calendario de Clases Reservadas</h2>
+            <div class="calendar-header">
+                <button onclick="changeMonth(-1)">&#9664;</button>
+                <span id="month-year">Junio 2025</span>
+                <button onclick="changeMonth(1)">&#9654;</button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid">
+                <div class="calendar-weekday">Dom</div>
+                <div class="calendar-weekday">Lun</div>
+                <div class="calendar-weekday">Mar</div>
+                <div class="calendar-weekday">Mié</div>
+                <div class="calendar-weekday">Jue</div>
+                <div class="calendar-weekday">Vie</div>
+                <div class="calendar-weekday">Sáb</div>
+                </div>
+        </div>
+    </div>
+
 </div>
 
-<button class="back" onclick="window.location.href='clases.html'">← Regresar a Clases</button>
-
-<!-- MODAL -->
 <div class="modal-bg" id="modal-bg">
     <div class="modal">
-        <h3>¿Cancelar esta clase?</h3>
-        <p>Esta acción no se puede deshacer</p>
-        <br>
-        <button class="btn-cancel" onclick="cerrarModal()">No</button>
-        <button class="btn-confirm" id="confirmarBtn">Sí, cancelar</button>
+        <h3>Confirmar Cancelación</h3>
+        <p>Estás a punto de cancelar tu reserva. **Esta acción no se puede deshacer**.</p>
+        <div class="detalle-clase-cancelar">
+            <p><strong>Clase:</strong> <span id="modalTituloCancel"></span></p>
+            <p><strong>Horario:</strong> <span id="modalHorarioCancel"></span></p>
+            <p><strong>Precio:</strong> <span id="modalPrecioCancel"></span></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="cerrarModal()">Mantener Reserva</button>
+            <button class="btn-confirm" id="confirmarBtn">Sí, Cancelar Clase</button>
+        </div>
     </div>
 </div>
 
+<div class="success-dialog" id="success-dialog">
+    <i class="fas fa-check-circle"></i>
+    <h3>¡Cancelación Exitosa!</h3>
+    <p>Tu reserva ha sido cancelada satisfactoriamente. La página se recargará en breve.</p>
+</div>
+
+
 <script>
     /* ==========================
-    TOKEN y seguridad
+    VARIABLES GLOBALES Y VALIDACIÓN
     ========================== */
     const token = localStorage.getItem("token");
     let reservaAEliminar = null;
+    let reservasGlobal = [];
+    
+    // Para el calendario
+    let currentDisplayDate = new Date(); 
 
     if (!token) {
         alert("No has iniciado sesión.");
         window.location.href = "login.html";
     }
 
-    /* ==========================
-    SIDEBAR - abrir/cerrar EXACTAMENTE igual
-    ========================== */
+    // Función del Menú
     function toggleMenu() {
         document.getElementById("sidebar").classList.toggle("active");
     }
 
-    /* ==========================
-    PERFIL (igual dicebear)
-    ========================== */
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const nombre =
-            payload.nombre ||
-            payload.usuario ||
-            payload.name ||
-            payload.fullname ||
-            payload.email?.split("@")[0] ||
-            "Usuario";
+    /* =========================================
+    PERFIL
+    ========================================= */
+    async function cargarPerfil() {
+        // ... (Tu código de cargar perfil) ...
+        let nombreJWT = "Usuario";
 
-        document.getElementById("nombreUsuario").textContent = nombre;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            nombreJWT = payload.nombre || payload.usuario || payload.name || payload.email?.split("@")[0] || "Usuario";
+        } catch (e) {}
+
+        document.getElementById("nombreUsuario").textContent = nombreJWT;
         document.getElementById("avatar").src =
-            `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(nombre)}`;
-    } catch (e) {
-        // token decode falló (no bloqueamos la página aquí porque ya validamos antes)
-        console.warn("No se pudo leer el payload del token:", e);
+            `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(nombreJWT)}`;
+
+        try {
+            const res = await fetch("/api/usuarios/perfil", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (!res.ok) return;
+            const data = await res.json();
+
+            if (data.nombre) {
+                document.getElementById("nombreUsuario").textContent = data.nombre;
+            }
+            if (data.foto) {
+                document.getElementById("avatar").src = "/uploads/" + data.foto;
+            }
+        } catch (e) {
+            console.warn("No se pudo cargar el perfil real:", e);
+        }
     }
+    cargarPerfil();
+
 
     /* ==========================
-    MODO OSCURO (igual)
+    MODO OSCURO (Persistencia)
     ========================== */
     const toggleDark = document.getElementById("darkToggle");
+    
+    function cargarModoOscuro() {
+        const isDark = localStorage.getItem('darkModeEnabled') === 'true'; 
+        document.body.classList.toggle("dark", isDark);
+        toggleDark.checked = isDark;
+    }
+    
     toggleDark.addEventListener("change", () => {
-        document.body.classList.toggle("dark", toggleDark.checked);
+        const isChecked = toggleDark.checked;
+        document.body.classList.toggle("dark", isChecked);
+        localStorage.setItem('darkModeEnabled', isChecked);
     });
+    
+    cargarModoOscuro();
 
     /* ==========================
     LOGOUT
     ========================== */
     function logout() {
         localStorage.removeItem("token");
+        localStorage.removeItem("darkModeEnabled");
         window.location.href = "login.html";
     }
 
     /* ==========================
-    MODAL (Mis Reservas)
+    GESTIÓN DEL MODAL DE CANCELACIÓN Y ÉXITO
     ========================== */
     function abrirModal(idReserva) {
         reservaAEliminar = idReserva;
+
+        const reserva = reservasGlobal.find(r => Number(r.id_reserva) === idReserva);
+
+        if (reserva) {
+            const horarioFormato = new Date(reserva.horario).toLocaleString('es-ES', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            document.getElementById("modalTituloCancel").textContent = reserva.titulo;
+            document.getElementById("modalHorarioCancel").textContent = horarioFormato;
+            document.getElementById("modalPrecioCancel").textContent = `$${Number(reserva.precio).toFixed(2)}`;
+        }
+
         document.getElementById("modal-bg").style.display = "flex";
     }
+
     function cerrarModal() {
         document.getElementById("modal-bg").style.display = "none";
         reservaAEliminar = null;
+        document.getElementById("confirmarBtn").disabled = false;
+        document.getElementById("confirmarBtn").textContent = 'Sí, Cancelar Clase';
+    }
+
+    function mostrarDialogoExito() {
+        document.getElementById("modal-bg").style.display = "none";
+        const successDialog = document.getElementById("success-dialog");
+        
+        // Aplica la clase para mostrar y animar
+        successDialog.classList.add('show');
+
+        // Oculta el diálogo y recarga la página después de 2.5 segundos
+        setTimeout(() => {
+            successDialog.classList.remove('show');
+            location.reload(); 
+        }, 2500); 
     }
 
     document.getElementById("confirmarBtn").onclick = function () {
         if (!reservaAEliminar) return;
 
+        this.disabled = true;
+        this.textContent = 'Cancelando...';
+
         fetch(`/api/clases/cancelar/${reservaAEliminar}`, {
             method: "DELETE",
             headers: { "Authorization": `Bearer ${token}` }
         })
-        .then(res => res.json())
-        .then(() => location.reload())
-        .catch(err => console.error(err));
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Error al cancelar la reserva');
+            }
+            return res.json();
+        })
+        .then(() => {
+            // ÉXITO: Muestra el diálogo y luego recarga
+            mostrarDialogoExito(); 
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error al intentar cancelar la clase.");
+            document.getElementById("confirmarBtn").disabled = false;
+            document.getElementById("confirmarBtn").textContent = 'Sí, Cancelar Clase';
+            cerrarModal();
+        });
     };
 
     /* ==========================
-    CARGAR RESERVAS (tabla con estilo igual)
+    CALENDARIO (LÓGICA) 📅
+    ========================== */
+
+    function getDaysInMonth(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+    
+    // Función auxiliar para formatear la hora (ej: 10:00)
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function renderCalendar() {
+        const year = currentDisplayDate.getFullYear();
+        const month = currentDisplayDate.getMonth();
+        
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        document.getElementById('month-year').textContent = `${monthNames[month]} ${year}`;
+
+        const grid = document.getElementById('calendar-grid');
+        let daysHtml = '';
+        const dayNames = grid.querySelectorAll('.calendar-weekday');
+        dayNames.forEach(day => daysHtml += day.outerHTML);
+        grid.innerHTML = daysHtml; 
+
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const daysInMonth = getDaysInMonth(year, month);
+        
+        // Mapea reservas por fecha (string de la fecha: 'YYYY-MM-DD' -> [reserva1, reserva2])
+        const reservationsByDate = reservasGlobal.reduce((acc, r) => {
+            const dateOnly = new Date(r.horario).toISOString().split('T')[0]; 
+            if (!acc[dateOnly]) {
+                acc[dateOnly] = [];
+            }
+            acc[dateOnly].push(r);
+            return acc;
+        }, {});
+        
+        // 1. Días vacíos iniciales (padding)
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            grid.innerHTML += `<div class="calendar-day"></div>`;
+        }
+
+        // 2. Días del mes
+        const todayString = new Date().toISOString().split('T')[0];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateOnlyString = date.toISOString().split('T')[0];
+            
+            let classList = 'calendar-day current-month';
+            let dotHtml = '';
+            let reservationInfoHtml = '';
+
+            const dayReservations = reservationsByDate[dateOnlyString];
+
+            if (dayReservations && dayReservations.length > 0) {
+                // Añade el punto indicador
+                dotHtml = `<div class="calendar-dot"></div>`;
+                
+                // Construye el Tooltip (reservation-info)
+                reservationInfoHtml += `<div class="reservation-info">`;
+                
+                // Muestra el día en el Tooltip
+                const tooltipDate = date.toLocaleDateString('es-ES', { 
+                    weekday: 'short', month: 'short', day: 'numeric' 
+                });
+                reservationInfoHtml += `<strong>${tooltipDate}</strong>`;
+                
+                // Lista de clases
+                dayReservations.forEach(res => {
+                    const hora = formatTime(res.horario);
+                    reservationInfoHtml += `<p>${hora} - ${escapeHtml(res.titulo)}</p>`;
+                });
+
+                reservationInfoHtml += `</div>`;
+            }
+
+            // Marca el día actual (si está en el mes correcto)
+            if (dateOnlyString === todayString) {
+                classList += ' today';
+            }
+            
+            grid.innerHTML += `
+                <div class="${classList}">
+                    <span class="calendar-day-number">${day}</span>
+                    ${dotHtml}
+                    ${reservationInfoHtml}
+                </div>
+            `;
+        }
+    }
+
+    function changeMonth(delta) {
+        currentDisplayDate.setMonth(currentDisplayDate.getMonth() + delta);
+        renderCalendar();
+    }
+
+
+    /* ==========================
+    CARGAR RESERVAS (Y Renderizar Calendario)
     ========================== */
     fetch("/api/clases/mis-reservas", {
         headers: { "Authorization": `Bearer ${token}` }
     })
     .then(res => res.json())
     .then(reservas => {
+        reservasGlobal = reservas;
         const cont = document.getElementById("reservas");
 
         if (!Array.isArray(reservas) || reservas.length === 0) {
             cont.innerHTML = `<p>No tienes reservas todavía.</p>`;
+            document.getElementById("total").innerHTML = `Total a pagar: <strong>$0.00</strong>`;
+            renderCalendar(); 
             return;
         }
 
+        // --- Renderizar Tabla ---
         let tabla = `
             <table>
                 <thead>
@@ -351,7 +699,6 @@
                         <th>Título</th>
                         <th>Horario</th>
                         <th>Instructor</th>
-                        <th>Descripción</th>
                         <th>Precio</th>
                         <th>Acción</th>
                     </tr>
@@ -364,13 +711,8 @@
         reservas.forEach(r => {
             total += Number(r.precio) || 0;
 
-            // Formatear horario a formato legible (DD/MM/YYYY HH:MM)
             const horarioFormato = new Date(r.horario).toLocaleString('es-ES', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
+                year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
             });
 
             tabla += `
@@ -378,7 +720,6 @@
                     <td>${escapeHtml(r.titulo)}</td>
                     <td>${horarioFormato}</td>
                     <td>${escapeHtml(r.instructor)}</td>
-                    <td>${escapeHtml(r.descripcion || "")}</td>
                     <td>$${Number(r.precio).toFixed(2)}</td>
                     <td><button class="cancel-btn" onclick="abrirModal(${Number(r.id_reserva)})">Cancelar</button></td>
                 </tr>
@@ -390,14 +731,17 @@
 
         document.getElementById("total").innerHTML =
             `Total a pagar: <strong>$${total.toFixed(2)}</strong>`;
+            
+        // --- Renderizar Calendario ---
+        renderCalendar();
     })
     .catch(err => {
         console.error(err);
-        alert("Error al cargar tus reservas.");
+        document.getElementById("reservas").innerHTML = `<p>Error al cargar tus reservas.</p>`;
     });
 
     /* ==========================
-    UTIL: escapar HTML para evitar inyección en el template
+    UTIL
     ========================== */
     function escapeHtml(str) {
         if (str === null || str === undefined) return "";

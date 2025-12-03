@@ -23,10 +23,25 @@
             width: 350px;
         }
 
+        /* --- ESTILO MODIFICADO PARA EL LOGO (Más grande y centrado) --- */
+        .logo {
+            text-align: center; /* Centra la imagen horizontalmente */
+            margin-bottom: 35px; /* Espacio después del logo */
+            margin-top: -10px; 
+        }
+
+        .logo img {
+            max-width: 280px; /* ¡Ahora más grande! */
+            width: 100%; 
+            height: auto;
+        }
+        /* ----------------------------------------------------------------- */
+
         h1 {
             text-align: center;
             color: #4a90e2;
             margin-bottom: 20px;
+            margin-top: 0;
         }
 
         input,
@@ -120,6 +135,9 @@
 <body>
 
     <div class="container">
+        <div class="logo">
+            <img src="/uploads/Logo itson.png" alt="Logo ITSON">
+        </div>
         <h1>Login</h1>
 
         <form id="loginForm">
@@ -128,12 +146,11 @@
             <div class="password-container">
                 <input type="password" name="contraseña" id="password" placeholder="Contraseña" required>
 
-                <svg class="toggle-eye" id="togglePassword" xmlns="http://www.w3.org/2000/svg"
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path id="eyePath" stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path id="eyeOutline" stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2"
+                <svg class="toggle-eye" id="togglePassword" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path id="eyePath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path id="eyeOutline" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
             </div>
@@ -149,7 +166,6 @@
         </p>
     </div>
 
-    <!-- Modal -->
     <div class="modal" id="successModal">
         <div class="modal-content" id="modalContent">
             Usuario accedió correctamente
