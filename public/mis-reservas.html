@@ -7,7 +7,7 @@
 
     <style>
         /* ==========================
-           RESET Y BASE
+        RESET Y BASE
         ========================== */
         * { box-sizing: border-box; }
 
@@ -21,7 +21,7 @@
         }
 
         /* ==========================
-           MODO OSCURO (igual que Clases)
+        MODO OSCURO (igual que Clases)
         ========================== */
         body.dark {
             background: #1e1e1e;
@@ -44,7 +44,7 @@
         body.dark tr:hover { background: #3b3b3b !important; }
 
         /* ==========================
-           SIDEBAR (idéntica a Clases)
+        SIDEBAR (idéntica a Clases)
         ========================== */
         .sidebar {
             position: fixed;
@@ -107,7 +107,7 @@
         }
 
         /* ==========================
-           HEADER + CONTENEDOR (Mis Reservas)
+        HEADER + CONTENEDOR (Mis Reservas)
         ========================== */
         header {
             background: #2a4d69;
@@ -134,7 +134,7 @@
         }
 
         /* ==========================
-           TABLA (igual estilo que Clases)
+        TABLA (igual estilo que Clases)
         ========================== */
         table {
             width: 100%;
@@ -251,7 +251,7 @@
 
 <script>
     /* ==========================
-       TOKEN y seguridad
+    TOKEN y seguridad
     ========================== */
     const token = localStorage.getItem("token");
     let reservaAEliminar = null;
@@ -262,14 +262,14 @@
     }
 
     /* ==========================
-       SIDEBAR - abrir/cerrar EXACTAMENTE igual
+    SIDEBAR - abrir/cerrar EXACTAMENTE igual
     ========================== */
     function toggleMenu() {
         document.getElementById("sidebar").classList.toggle("active");
     }
 
     /* ==========================
-       PERFIL (igual dicebear)
+    PERFIL (igual dicebear)
     ========================== */
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -290,7 +290,7 @@
     }
 
     /* ==========================
-       MODO OSCURO (igual)
+    MODO OSCURO (igual)
     ========================== */
     const toggleDark = document.getElementById("darkToggle");
     toggleDark.addEventListener("change", () => {
@@ -298,7 +298,7 @@
     });
 
     /* ==========================
-       LOGOUT
+    LOGOUT
     ========================== */
     function logout() {
         localStorage.removeItem("token");
@@ -306,7 +306,7 @@
     }
 
     /* ==========================
-       MODAL (Mis Reservas)
+    MODAL (Mis Reservas)
     ========================== */
     function abrirModal(idReserva) {
         reservaAEliminar = idReserva;
@@ -330,7 +330,7 @@
     };
 
     /* ==========================
-       CARGAR RESERVAS (tabla con estilo igual)
+    CARGAR RESERVAS (tabla con estilo igual)
     ========================== */
     fetch("/api/clases/mis-reservas", {
         headers: { "Authorization": `Bearer ${token}` }
@@ -388,7 +388,7 @@
     });
 
     /* ==========================
-       UTIL: escapar HTML para evitar inyección en el template
+    UTIL: escapar HTML para evitar inyección en el template
     ========================== */
     function escapeHtml(str) {
         if (str === null || str === undefined) return "";

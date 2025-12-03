@@ -6,6 +6,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
 
@@ -13,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 /* ------------------------------
-   Conexión a MySQL
+✅ Conexión a MySQL
 ------------------------------ */
 const db = mysql.createPool({
     host: process.env.DB_HOST,
@@ -28,38 +29,32 @@ const db = mysql.createPool({
 
 db.getConnection((err, connection) => {
     if (err) {
-        console.error("Error al conectar a MySQL:", err);
+        console.error("❌ Error al conectar a MySQL:", err);
         return;
     }
-    console.log("Conectado a la base de datos MySQL");
+    console.log("✅ Conectado a la base de datos MySQL");
     connection.release();
 });
 
-// Exportar para rutas
 global.db = db;
 
 /* ------------------------------
-   Servir archivos estáticos
+✅ Servir archivos estáticos
 ------------------------------ */
-console.log("STATIC PATH:", path.join(__dirname, "public"));
-
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-app.get('/clases.html', (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "clases.html"));
-});
-
 /* ------------------------------
-   Middleware de autenticación
+✅ Middleware de autenticación
 ------------------------------ */
 const { authenticateToken, authorizeRoles } = require('./middleware/authMiddleware');
 
 /* ------------------------------
-   Registro
+✅ Registro
 ------------------------------ */
 app.post('/api/auth/register', async (req, res) => {
     const { nombre, email, contraseña, rol } = req.body;
@@ -77,8 +72,8 @@ app.post('/api/auth/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(contraseña, 10);
 
         await db.promise().query(
-            'INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES (?, ?, ?, ?)',
-            [nombre, email, hashedPassword, rol]
+            'INSERT INTO usuarios (nombre, email, contraseña, rol, foto) VALUES (?, ?, ?, ?, ?)',
+            [nombre, email, hashedPassword, rol, 'default.png']
         );
 
         res.json({ message: 'Usuario registrado correctamente' });
@@ -90,7 +85,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 /* ------------------------------
-   Login
+✅ Login
 ------------------------------ */
 app.post('/api/auth/login', async (req, res) => {
     const { email, contraseña } = req.body;
@@ -116,7 +111,7 @@ app.post('/api/auth/login', async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.json({ token, rol: user.rol });
+        res.json({ token, rol: user.rol, foto: user.foto });
 
     } catch (err) {
         console.error(err);
@@ -125,16 +120,76 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 /* ------------------------------
-   Rutas de clases
+✅ Obtener perfil (NUEVA RUTA CORRECTA)
+------------------------------ */
+app.get('/api/usuarios/perfil', authenticateToken, async (req, res) => {
+    try {
+        const id = req.user.id_usuario;
+
+        const [rows] = await db.promise().query(
+            'SELECT nombre, foto FROM usuarios WHERE id_usuario = ?',
+            [id]
+        );
+
+        res.json(rows[0]);
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/* ------------------------------
+✅ Multer configuración
+------------------------------ */
+const storage = multer.diskStorage({
+    destination: './uploads',
+    filename: (req, file, cb) => {
+        cb(null, `user_${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ storage });
+
+/* ------------------------------
+✅ Subir foto (NUEVA RUTA CORRECTA)
+------------------------------ */
+app.post('/api/usuarios/foto', authenticateToken, upload.single('foto'), async (req, res) => {
+    const id_usuario = req.user.id_usuario;
+    const fileName = req.file.filename;
+
+    try {
+        await db.promise().query(
+            'UPDATE usuarios SET foto = ? WHERE id_usuario = ?',
+            [fileName, id_usuario]
+        );
+
+        res.json({
+            success: true,
+            foto: fileName
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: 'Error al guardar la foto' });
+    }
+});
+
+/* ------------------------------
+✅ Rutas de clases
 ------------------------------ */
 const classesRoutes = require('./routes/classes');
 app.use('/api/clases', classesRoutes);
 
 /* ------------------------------
-   Iniciar servidor
+✅ Rutas de instructor
+------------------------------ */
+const instructorRoutes = require('./routes/instructor');
+app.use('/api/instructor', instructorRoutes);
+
+/* ------------------------------
+✅ Iniciar servidor
 ------------------------------ */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });

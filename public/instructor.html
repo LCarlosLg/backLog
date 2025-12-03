@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Instructor</title>
+
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css">
+
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ESTILOS -->
+    <style>
+        :root {
+            --primary: #1466ff;
+            --primary-dark: #0044cc;
+            --bg: #f7f9ff;
+            --card: #ffffff;
+            --text: #111;
+        }
+
+        body.dark {
+            --bg:#0f172a;
+            --card:#1e293b;
+            --text:#fff;
+            --primary:#3b82f6;
+            --primary-dark:#1d4ed8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            transition: .3s;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--primary);
+            height: 100vh;
+            color: white;
+            padding: 25px 15px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            text-align: center;
+        }
+
+        .sidebar img {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .sidebar h3 {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            margin-top: 30px;
+            background: white;
+            color: var(--primary);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .content {
+            margin-left: 270px;
+            padding: 25px;
+            flex: 1;
+        }
+
+        button {
+            background: var(--primary);
+            border: none;
+            padding: 10px 16px;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #inputFotoPerfil {
+            display: none;
+        }
+
+        .modo-btn {
+            margin-top: 20px;
+            background: black;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ✅ SIDEBAR -->
+    <div class="sidebar">
+        <img id="fotoUsuario" src="uploads/default.png" title="Cambiar foto">
+        <h3 id="nombreUsuario">Cargando...</h3>
+
+        <input type="file" id="inputFotoPerfil" accept="image/*">
+
+        <button class="modo-btn" id="modoOscuroBtn">Modo Oscuro</button>
+
+        <div class="logout-btn" onclick="logout()">
+            <i class="ri-logout-box-r-line"></i> Cerrar sesión
+        </div>
+    </div>
+
+    <!-- ✅ CONTENIDO -->
+    <div class="content">
+        <h1>Panel del Instructor</h1>
+        <button id="btnCrearClase">➕ Crear Nueva Clase</button>
+
+        <div class="card">
+            <h2>Mis Clases</h2>
+            <table id="tablaClases">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th>Horario</th>
+                        <th>Cupo</th>
+                        <th>Precio</th>
+                        <th>Instructor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- ✅ CALENDARIO -->
+        <div class="card">
+            <h2>Calendario de Clases</h2>
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+
+<script>
+
+const token = localStorage.getItem("token");
+
+/* ✅ Cargar perfil */
+async function cargarPerfil() {
+    const res = await fetch('/api/usuarios/perfil', {
+        headers:{ "Authorization": `Bearer ${token}` }
+    });
+    const u = await res.json();
+
+    nombreUsuario.innerText = u.nombre;
+    fotoUsuario.src = u.foto ? "/uploads/" + u.foto : "/uploads/default.png";
+}
+
+/* ✅ Cambiar foto */
+fotoUsuario.onclick = () => inputFotoPerfil.click();
+
+inputFotoPerfil.onchange = async () => {
+    const formData = new FormData();
+    formData.append("foto", inputFotoPerfil.files[0]);
+
+    const res = await fetch('/api/usuarios/foto', {
+        method: "POST",
+        headers:{ "Authorization": `Bearer ${token}` },
+        body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.foto) {
+        fotoUsuario.src = "/uploads/" + data.foto;
+        Swal.fire("✅ Foto actualizada", "", "success");
+    }
+};
+
+/* ✅ Cargar SOLO mis clases */
+async function cargarClases() {
+    const res = await fetch('/api/instructor/mis-clases',{
+        headers:{ "Authorization": `Bearer ${token}` }
+    });
+    const clases = await res.json();
+
+    const tbody = document.querySelector("#tablaClases tbody");
+    tbody.innerHTML = "";
+
+    clases.forEach(c => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${c.titulo}</td>
+            <td>${c.descripcion}</td>
+            <td>${c.horario}</td>
+            <td>${c.cupo_maximo}</td>
+            <td>${c.precio}</td>
+            <td>${c.instructor_nombre}</td>
+            <td>
+                <button onclick="editarClase(${c.id_clase})">Editar</button>
+                <button onclick="verAlumnos(${c.id_clase})">Alumnos</button>
+                <button onclick="eliminarClase(${c.id_clase})">Eliminar</button>
+            </td>
+        </tr>`;
+    });
+
+    actualizarCalendario(clases);
+}
+
+/* ✅ Editar clase */
+async function editarClase(id) {
+    Swal.fire({
+        title: "Editar Clase",
+        html: `
+            <input id="titulo" class="swal2-input" placeholder="Nuevo título">
+            <textarea id="descripcion" class="swal2-textarea" placeholder="Nueva descripción"></textarea>
+            <input id="horario" type="datetime-local" class="swal2-input">
+            <input id="cupo" type="number" class="swal2-input" placeholder="Nuevo cupo">
+            <input id="precio" type="number" class="swal2-input" placeholder="Nuevo precio">
+        `,
+        confirmButtonText: "Guardar",
+        showCancelButton: true,
+        preConfirm: async () => {
+            const edit = {
+                titulo: document.getElementById("titulo").value,
+                descripcion: document.getElementById("descripcion").value,
+                horario: document.getElementById("horario").value,
+                cupo_maximo: document.getElementById("cupo").value,
+                precio: document.getElementById("precio").value
+            };
+
+            await fetch(`/api/instructor/editar/${id}`, {
+                method: "PUT",
+                headers:{
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(edit)
+            });
+
+            Swal.fire("✅ Clase actualizada", "", "success");
+            cargarClases();
+        }
+    });
+}
+
+/* ✅ Ver alumnos inscritos */
+async function verAlumnos(id) {
+    const res = await fetch(`/api/instructor/alumnos/${id}`, {
+        headers:{ "Authorization": `Bearer ${token}` }
+    });
+
+    const alumnos = await res.json();
+
+    let lista = alumnos.map(a => `<li>${a.nombre}</li>`).join("");
+
+    Swal.fire({
+        title: "Alumnos inscritos",
+        html: `<ul style="text-align:left;">${lista}</ul>`,
+        confirmButtonText: "Cerrar"
+    });
+}
+
+/* ✅ Crear clase */
+btnCrearClase.onclick = () => {
+    Swal.fire({
+        title: "Crear Clase",
+        html: `
+            <input id="titulo" class="swal2-input" placeholder="Título">
+            <textarea id="descripcion" class="swal2-textarea" placeholder="Descripción"></textarea>
+            <input id="horario" type="datetime-local" class="swal2-input">
+            <input id="cupo" type="number" class="swal2-input" placeholder="Cupo máximo">
+            <input id="precio" type="number" class="swal2-input" placeholder="Precio">
+        `,
+        confirmButtonText: "Guardar",
+        showCancelButton: true,
+        preConfirm: async () => {
+            const nuevaClase = {
+                titulo: document.getElementById("titulo").value,
+                descripcion: document.getElementById("descripcion").value,
+                horario: document.getElementById("horario").value,
+                cupo_maximo: document.getElementById("cupo").value,
+                precio: document.getElementById("precio").value
+            };
+
+            await fetch("/api/instructor/crear", {
+                method: "POST",
+                headers:{
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(nuevaClase)
+            });
+
+            Swal.fire("✅ Clase creada", "", "success");
+            cargarClases();
+        }
+    });
+};
+
+/* ✅ Eliminar */
+async function eliminarClase(id) {
+    Swal.fire({
+        title: "¿Eliminar clase?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Eliminar"
+    }).then(async r => {
+        if (r.isConfirmed) {
+            await fetch(`/api/instructor/eliminar/${id}`, {
+                method:"DELETE",
+                headers:{ "Authorization": `Bearer ${token}` }
+            });
+            cargarClases();
+            Swal.fire("✅ Eliminada", "", "success");
+        }
+    });
+}
+
+/* ✅ Calendario */
+let calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    initialView: 'dayGridMonth',
+    height: 600,
+    events: []
+});
+calendar.render();
+
+function actualizarCalendario(clases) {
+    const eventos = clases.map(c => ({
+        title: c.titulo,
+        date: c.horario
+    }));
+
+    calendar.removeAllEvents();
+    calendar.addEventSource(eventos);
+}
+
+/* ✅ Modo oscuro */
+modoOscuroBtn.onclick = () => {
+    document.body.classList.toggle("dark");
+};
+
+/* ✅ Logout */
+function logout() {
+    Swal.fire({
+        title: "¿Cerrar sesión?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí"
+    }).then(r => {
+        if (r.isConfirmed) {
+            localStorage.clear();
+            window.location = "login.html";
+        }
+    });
+}
+
+/* ✅ Inicializar */
+cargarPerfil();
+cargarClases();
+
+</script>
+
+</body>
+</html>
