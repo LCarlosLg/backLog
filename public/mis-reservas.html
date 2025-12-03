@@ -364,10 +364,19 @@
         reservas.forEach(r => {
             total += Number(r.precio) || 0;
 
+            // Formatear horario a formato legible (DD/MM/YYYY HH:MM)
+            const horarioFormato = new Date(r.horario).toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
             tabla += `
                 <tr>
                     <td>${escapeHtml(r.titulo)}</td>
-                    <td>${escapeHtml(r.horario)}</td>
+                    <td>${horarioFormato}</td>
                     <td>${escapeHtml(r.instructor)}</td>
                     <td>${escapeHtml(r.descripcion || "")}</td>
                     <td>$${Number(r.precio).toFixed(2)}</td>

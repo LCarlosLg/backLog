@@ -93,22 +93,94 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark table {
+            background: var(--card);
         }
 
         th {
             background: var(--primary);
             color: white;
-            padding: 12px;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th:last-child {
+            border-right: none;
         }
 
         td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
+            padding: 14px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: middle;
+            min-height: 45px;
+        }
+
+        body.dark td {
+            border-bottom-color: #444;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        body.dark tr:hover {
+            background: #2a3a50;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td button {
+            margin-right: 5px;
+            padding: 7px 12px;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        td button:last-child {
+            margin-right: 0;
+        }
+
+        /* Centrar descripción, horario, cupo, etc (columnas 2-6) */
+        tbody td:nth-child(2),
+        tbody td:nth-child(3),
+        tbody td:nth-child(4),
+        tbody td:nth-child(5),
+        tbody td:nth-child(6) {
+            text-align: center;
+        }
+
+        tbody td:nth-child(7) {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        tbody td:nth-child(7) button {
+            flex: 0 0 auto;
+            white-space: nowrap;
         }
 
         #inputFotoPerfil {
@@ -119,6 +191,303 @@
             margin-top: 20px;
             background: black;
             color: white;
+            width: 100%;
+        }
+
+        .notif-btn {
+            width: 100%;
+            margin-top: 10px;
+            background: #ff9800;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .notif-btn:hover {
+            background: #e68900;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* ✅ NOTIFICACIONES */
+        .notificaciones-container {
+            position: relative;
+        }
+
+        .notificaciones-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 500px;
+            height: 100vh;
+            background: white;
+            border-left: 2px solid #ddd;
+            box-shadow: -3px 0 15px rgba(0,0,0,0.1);
+            z-index: 999;
+            overflow-y: auto;
+            flex-direction: column;
+        }
+
+        body.dark .notificaciones-panel {
+            background: var(--card);
+            border-color: #444;
+        }
+
+        .notificaciones-panel.active {
+            display: flex;
+        }
+
+        .notificaciones-header {
+            padding: 20px;
+            border-bottom: 2px solid #eee;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        body.dark .notificaciones-header {
+            border-color: #444;
+        }
+
+        #notificacionesLista {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .notif-item {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notif-item:hover {
+            background: #f5f5f5;
+        }
+
+        body.dark .notif-item:hover {
+            background: #2a3a50;
+        }
+
+        body.dark .notif-item {
+            border-color: #444;
+        }
+
+        .notif-item.sin-leer {
+            background: #e8f4ff;
+            border-left: 4px solid var(--primary);
+        }
+
+        body.dark .notif-item.sin-leer {
+            background: #1a3a50;
+        }
+
+        .notif-alumno {
+            font-weight: bold;
+            color: #1466ff;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .notif-clase {
+            font-size: 15px;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        body.dark .notif-clase {
+            color: #aaa;
+        }
+
+        .notif-fecha {
+            font-size: 13px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        body.dark .notif-fecha {
+            color: #666;
+        }
+
+        .notif-vacia {
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .btn-marcar-leida {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-marcar-leida:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-cerrar-notif {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 0;
+            width: auto;
+        }
+
+        .btn-cerrar-notif:hover {
+            opacity: 0.8;
+        }
+
+        body.dark .notificaciones-header {
+            border-color: #444;
+        }
+
+        .notif-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notif-item:hover {
+            background: #f5f5f5;
+        }
+
+        body.dark .notif-item:hover {
+            background: #2a3a50;
+        }
+
+        body.dark .notif-item {
+            border-color: #444;
+        }
+
+        .notif-item.sin-leer {
+            background: #e8f4ff;
+        }
+
+        body.dark .notif-item.sin-leer {
+            background: #1a3a50;
+        }
+
+        .notif-alumno {
+            font-weight: bold;
+            color: #1466ff;
+        }
+
+        .notif-clase {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        body.dark .notif-clase {
+            color: #aaa;
+        }
+
+        .notif-fecha {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        body.dark .notif-fecha {
+            color: #666;
+        }
+
+        .notif-vacia {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .btn-marcar-leida {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .btn-marcar-leida:hover {
+            background: var(--primary-dark);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-top h1 {
+            margin: 0;
+        }
+
+        .header-top .notificaciones-container {
+            margin-right: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark .card {
+            background: var(--card);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        .card table {
+            margin: 0;
+            box-shadow: none;
         }
     </style>
 </head>
@@ -131,16 +500,31 @@
 
         <input type="file" id="inputFotoPerfil" accept="image/*">
 
-        <button class="modo-btn" id="modoOscuroBtn">Modo Oscuro</button>
+        <button class="modo-btn" id="modoOscuroBtn">🌙 Modo Oscuro</button>
+
+        <button class="notif-btn" id="btnNotificaciones" title="Ver notificaciones">
+            📬 Notificaciones
+            <span class="notif-badge" id="badge">0</span>
+        </button>
 
         <div class="logout-btn" onclick="logout()">
             <i class="ri-logout-box-r-line"></i> Cerrar sesión
         </div>
     </div>
 
+    <!-- ✅ PANEL DE NOTIFICACIONES (Lado derecho full height) -->
+    <div class="notificaciones-panel" id="notificacionesPanel">
+        <div class="notificaciones-header">
+            <span>📨 Notificaciones</span>
+            <button class="btn-cerrar-notif" onclick="cerrarNotificaciones()">✕</button>
+        </div>
+        <div id="notificacionesLista"></div>
+    </div>
+
     <!-- ✅ CONTENIDO -->
     <div class="content">
         <h1>Panel del Instructor</h1>
+
         <button id="btnCrearClase">➕ Crear Nueva Clase</button>
 
         <div class="card">
@@ -216,13 +600,22 @@ async function cargarClases() {
     tbody.innerHTML = "";
 
     clases.forEach(c => {
+        // Formatear horario a formato legible (DD/MM/YYYY HH:MM)
+        const horarioFormato = new Date(c.horario).toLocaleString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
         tbody.innerHTML += `
         <tr>
             <td>${c.titulo}</td>
             <td>${c.descripcion}</td>
-            <td>${c.horario}</td>
+            <td>${horarioFormato}</td>
             <td>${c.cupo_maximo}</td>
-            <td>${c.precio}</td>
+            <td>$${c.precio}</td>
             <td>${c.instructor_nombre}</td>
             <td>
                 <button onclick="editarClase(${c.id_clase})">Editar</button>
@@ -280,12 +673,28 @@ async function verAlumnos(id) {
 
     const alumnos = await res.json();
 
-    let lista = alumnos.map(a => `<li>${a.nombre}</li>`).join("");
+    if (alumnos.length === 0) {
+        Swal.fire({
+            title: "Alumnos inscritos",
+            html: "<p>No hay alumnos registrados en esta clase</p>",
+            confirmButtonText: "Cerrar"
+        });
+        return;
+    }
+
+    let lista = alumnos.map(a => `
+        <div style="text-align:left; padding:10px; margin:5px 0; background:#f5f5f5; border-radius:5px;">
+            <strong>${a.nombre}</strong><br>
+            <small>${a.email}</small><br>
+            <small style="color:#666;">Inscrito: ${new Date(a.fecha_reserva).toLocaleString('es-ES', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</small>
+        </div>
+    `).join("");
 
     Swal.fire({
         title: "Alumnos inscritos",
-        html: `<ul style="text-align:left;">${lista}</ul>`,
-        confirmButtonText: "Cerrar"
+        html: `<div style="max-height:400px; overflow-y:auto;">${lista}</div>`,
+        confirmButtonText: "Cerrar",
+        width: "450px"
     });
 }
 
@@ -383,9 +792,88 @@ function logout() {
     });
 }
 
+/* ✅ NOTIFICACIONES */
+async function cargarNotificaciones() {
+    try {
+        const res = await fetch('/api/instructor/notificaciones', {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const notificaciones = await res.json();
+
+        const lista = document.getElementById('notificacionesLista');
+        const badge = document.getElementById('badge');
+
+        // Contar no leídas
+        const sinLeer = notificaciones.filter(n => !n.leida).length;
+        badge.textContent = sinLeer;
+        badge.style.display = sinLeer > 0 ? 'flex' : 'none';
+
+        if (notificaciones.length === 0) {
+            lista.innerHTML = '<div class="notif-vacia">No hay notificaciones</div>';
+            return;
+        }
+
+        lista.innerHTML = notificaciones.map(n => `
+            <div class="notif-item ${n.leida ? '' : 'sin-leer'}" id="notif-${n.id_notificacion}">
+                <div class="notif-alumno">👤 ${n.alumno_nombre}</div>
+                <div class="notif-clase">📚 "${n.clase_titulo}"</div>
+                <div class="notif-clase">⏰ ${new Date(n.clase_horario).toLocaleString('es-ES', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}</div>
+                <div class="notif-fecha">${new Date(n.fecha).toLocaleString('es-ES')}</div>
+                ${!n.leida ? `<button class="btn-marcar-leida" onclick="marcarComoLeida(${n.id_notificacion})">Marcar como leída</button>` : ''}
+            </div>
+        `).join('');
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function marcarComoLeida(id) {
+    fetch(`/api/instructor/notificacion/${id}/leer`, {
+        method: 'PUT',
+        headers: { "Authorization": `Bearer ${token}` }
+    }).then(() => {
+        cargarNotificaciones();
+    });
+}
+
+function abrirNotificaciones() {
+    const panel = document.getElementById('notificacionesPanel');
+    panel.classList.toggle('active');
+    if (panel.classList.contains('active')) {
+        cargarNotificaciones();
+    }
+}
+
+function cerrarNotificaciones() {
+    document.getElementById('notificacionesPanel').classList.remove('active');
+}
+
+document.getElementById('btnNotificaciones').addEventListener('click', abrirNotificaciones);
+
+// Cerrar panel al hacer clic fuera
+document.addEventListener('click', (e) => {
+    const panel = document.getElementById('notificacionesPanel');
+    const btn = document.getElementById('btnNotificaciones');
+    if (!panel.contains(e.target) && !btn.contains(e.target)) {
+        panel.classList.remove('active');
+    }
+});
+
 /* ✅ Inicializar */
 cargarPerfil();
 cargarClases();
+cargarNotificaciones();
+
+// Recargar notificaciones cada 10 segundos
+setInterval(cargarNotificaciones, 10000);
+
 
 </script>
 

@@ -8,7 +8,7 @@ const { authenticateToken, authorizeRoles } = require('../middleware/authMiddlew
 ------------------------------------------- */
 router.get('/todas', authenticateToken, authorizeRoles('instructor'), async (req, res) => {
     try {
-        const [rows] = await db.promise().query(`
+        const [rows] = await global.db.promise().query(`
             SELECT 
                 c.*, 
                 u.nombre AS instructor_nombre
@@ -31,7 +31,7 @@ router.post('/crear', authenticateToken, authorizeRoles('instructor'), async (re
     const id_instructor = req.user.id_usuario;
 
     try {
-        await db.promise().query(
+        await global.db.promise().query(
             `INSERT INTO clases (titulo, descripcion, horario, cupo_maximo, precio, id_instructor)
             VALUES (?, ?, ?, ?, ?, ?)`,
             [titulo, descripcion, horario, cupo_maximo, precio, id_instructor]
@@ -52,7 +52,7 @@ router.get('/mis-clases', authenticateToken, authorizeRoles('instructor'), async
     try {
         const id_instructor = req.user.id_usuario;
 
-        const [rows] = await db.promise().query(
+        const [rows] = await global.db.promise().query(
             `SELECT 
                 c.*, 
                 u.nombre AS instructor_nombre
@@ -78,7 +78,7 @@ router.put('/editar/:id', authenticateToken, authorizeRoles('instructor'), async
     const id_instructor = req.user.id_usuario;
 
     try {
-        const [result] = await db.promise().query(
+        const [result] = await global.db.promise().query(
             `UPDATE clases 
             SET titulo=?, descripcion=?, horario=?, cupo_maximo=?, precio=?
             WHERE id_clase=? AND id_instructor=?`,
@@ -104,7 +104,7 @@ router.delete('/eliminar/:id', authenticateToken, authorizeRoles('instructor'), 
     const id_instructor = req.user.id_usuario;
 
     try {
-        const [result] = await db.promise().query(
+        const [result] = await global.db.promise().query(
             `DELETE FROM clases 
             WHERE id_clase=? AND id_instructor=?`,
             [id, id_instructor]
@@ -129,19 +129,102 @@ router.get('/alumnos/:id', authenticateToken, authorizeRoles('instructor'), asyn
     const id_instructor = req.user.id_usuario;
 
     try {
-        const [rows] = await db.promise().query(
+        const [rows] = await global.db.promise().query(
             `SELECT 
-                a.*, 
-                u.nombre AS alumno_nombre,
-                u.email AS alumno_email
-            FROM alumnos_clases a
-            LEFT JOIN usuarios u ON a.id_alumno = u.id_usuario
-            LEFT JOIN clases c ON c.id_clase = a.id_clase
-            WHERE a.id_clase = ? AND c.id_instructor = ?`,
+                u.id_usuario,
+                u.nombre,
+                u.email,
+                u.foto,
+                r.fecha_reserva
+            FROM reservas r
+            INNER JOIN usuarios u ON r.id_usuario = u.id_usuario
+            INNER JOIN clases c ON r.id_clase = c.id_clase
+            WHERE r.id_clase = ? AND c.id_instructor = ? AND r.estado = 'confirmada'
+            ORDER BY r.fecha_reserva DESC`,
             [id, id_instructor]
         );
 
         res.json(rows);
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/* ------------------------------------------
+✅ Ver notificaciones del instructor
+------------------------------------------- */
+router.get('/notificaciones', authenticateToken, authorizeRoles('instructor'), async (req, res) => {
+    const id_instructor = req.user.id_usuario;
+
+    try {
+        const [rows] = await global.db.promise().query(
+            `SELECT 
+                n.id_notificacion,
+                n.id_alumno,
+                n.id_clase,
+                n.mensaje,
+                n.leida,
+                n.fecha,
+                u.nombre AS alumno_nombre,
+                u.email AS alumno_email,
+                c.titulo AS clase_titulo,
+                c.horario AS clase_horario
+            FROM notificaciones n
+            LEFT JOIN usuarios u ON n.id_alumno = u.id_usuario
+            LEFT JOIN clases c ON n.id_clase = c.id_clase
+            WHERE n.id_instructor = ?
+            ORDER BY n.fecha DESC`,
+            [id_instructor]
+        );
+
+        res.json(rows);
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/* ------------------------------------------
+✅ Marcar notificación como leída
+------------------------------------------- */
+router.put('/notificacion/:id/leer', authenticateToken, authorizeRoles('instructor'), async (req, res) => {
+    const { id } = req.params;
+    const id_instructor = req.user.id_usuario;
+
+    try {
+        const [result] = await global.db.promise().query(
+            `UPDATE notificaciones 
+            SET leida = TRUE 
+            WHERE id_notificacion = ? AND id_instructor = ?`,
+            [id, id_instructor]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(403).json({ error: "No puedes actualizar una notificación que no es tuya" });
+        }
+
+        res.json({ message: "Notificación marcada como leída" });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/* ------------------------------------------
+✅ Contar notificaciones sin leer
+------------------------------------------- */
+router.get('/notificaciones/sin-leer/count', authenticateToken, authorizeRoles('instructor'), async (req, res) => {
+    const id_instructor = req.user.id_usuario;
+
+    try {
+        const [rows] = await global.db.promise().query(
+            `SELECT COUNT(*) as sin_leer FROM notificaciones 
+            WHERE id_instructor = ? AND leida = FALSE`,
+            [id_instructor]
+        );
+
+        res.json(rows[0]);
 
     } catch (err) {
         res.status(500).json({ error: err.message });

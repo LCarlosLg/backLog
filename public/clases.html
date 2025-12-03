@@ -325,6 +325,7 @@
     <div class="user-info">
         <img id="avatar" src="" alt="Foto de perfil">
         <h3 id="nombreUsuario">Usuario</h3>
+        <input type="file" id="inputFotoUsuario" accept="image/*" style="display:none">
     </div>
 
     <a href="#">📌 Adeudos</a>
@@ -422,8 +423,66 @@ const nombre =
     "Usuario";
 
 document.getElementById("nombreUsuario").textContent = nombre;
-document.getElementById("avatar").src =
-    `https://api.dicebear.com/9.x/initials/svg?seed=${nombre}`;
+const avatarEl = document.getElementById("avatar");
+
+// Intentar obtener perfil del servidor (incluye `foto`). Si existe una foto
+// subida, usarla; si no, usar DiceBear con las iniciales.
+(async () => {
+    try {
+        const res = await fetch('/api/usuarios/perfil', {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data.nombre) document.getElementById("nombreUsuario").textContent = data.nombre;
+
+            if (data.foto && data.foto !== 'default.png') {
+                avatarEl.src = `/uploads/${data.foto}`;
+            } else {
+                avatarEl.src = `https://api.dicebear.com/9.x/initials/svg?seed=${nombre}`;
+            }
+            return;
+        }
+    } catch (err) {
+        // Si falla la petición, mostramos la imagen por defecto (DiceBear)
+    }
+
+    avatarEl.src = `https://api.dicebear.com/9.x/initials/svg?seed=${nombre}`;
+})();
+
+// Permitir que el usuario cambie su foto de perfil (comportamiento similar a instructor.html)
+const inputFotoUsuario = document.getElementById('inputFotoUsuario');
+avatarEl.style.cursor = 'pointer';
+avatarEl.title = 'Cambiar foto';
+
+avatarEl.addEventListener('click', () => inputFotoUsuario.click());
+
+inputFotoUsuario.addEventListener('change', async () => {
+    if (!inputFotoUsuario.files || inputFotoUsuario.files.length === 0) return;
+
+    const formData = new FormData();
+    formData.append('foto', inputFotoUsuario.files[0]);
+
+    try {
+        const res = await fetch('/api/usuarios/foto', {
+            method: 'POST',
+            headers: { "Authorization": `Bearer ${token}` },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (data.foto) {
+            avatarEl.src = '/uploads/' + data.foto;
+            alert('✅ Foto actualizada');
+        } else {
+            alert('Error al actualizar la foto');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error de red al subir la foto');
+    }
+});
 
 /* ==========================
    DARK MODE
@@ -469,10 +528,19 @@ function mostrarClases(lista) {
     lista.forEach(c => {
         const row = document.createElement("tr");
 
+        // Formatear horario a formato legible (DD/MM/YYYY HH:MM)
+        const horarioFormato = new Date(c.horario).toLocaleString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
         row.innerHTML = `
             <td>${c.titulo}</td>
             <td>${c.descripcion}</td>
-            <td>${c.horario}</td>
+            <td>${horarioFormato}</td>
             <td>${c.cupo_maximo}</td>
             <td>$${c.precio}</td>
             <td>${c.instructor}</td>
